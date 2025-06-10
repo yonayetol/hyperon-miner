@@ -1,4 +1,6 @@
+
 !(import! &self  emp-tv-bs)
+
 
 ;; =============================================================================
 ;; Function: subsample-py
@@ -33,5 +35,30 @@
 
 (= (avrg-tv-py $x) (mean-tv $x))
 
+(= (get-element-by-Index $list $index)
+       (index-atom $list $index)
+)
+      
 
+(= (random-element $db)
+   (let* (
+           ($list (collapse (get-atoms $db)))
+           ($length (size-atom $list))
+           ($index (random-int 0 $length))
+           ($element (get-element-by-Index $list $index))
+         )
+         $element))
+
+(= (generet-random-subsample $db $subsize)
+   (if (== $subsize 0)
+       ()
+       (let* (             
+               ($elements (random-element $db))
+               ($_ (println "Selected element: " $elements))
+               ($tail-elements (generet-random-subsample $db (- $subsize 1)))
+             )
+             (cons-atom $elements $tail-elements)
+       )
+   )
+)
 
