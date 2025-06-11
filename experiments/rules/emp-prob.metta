@@ -40,6 +40,7 @@
 ;; Returns:
 ;;   - Empirical probability as float
 ;; =============================================================================
+(: emp-prob (-> Expression hyperon::space::DynSpace Number))
 (= (emp-prob $pattern $db)
     (let*
         ( ( $ucount   (universe-count $pattern $db))     
@@ -71,6 +72,7 @@
 ;; Returns:
 ;;   - Empirical probability from appropriate sample
 ;; =============================================================================
+(: emp_prob_subsmp (-> Expression hyperon::space::DynSpace Number Number))
 (= (emp_prob_subsmp $pattern $db $subsize)
 
     (if (< $subsize (db_size $db))
@@ -98,6 +100,7 @@
 ;; Returns:
 ;;   - List of probability values
 ;; =============================================================================
+(: emp_prob_helper (-> Expression hyperon::space::DynSpace Number Number Expression))
 (= (emp_prob_helper $pattern $db $n_resample $subsize) 
 
     (if (== $n_resample 0) 
@@ -134,6 +137,7 @@
 ;; Returns:
 ;;   - Averaged probability estimate
 ;; =============================================================================
+(: emp_prob_bs (-> Expression hyperon::space::DynSpace Number Number Number))
 ( = (emp_prob_bs $pattern $db $n_resample $subsize)
     (if (< $subsize (db_size $db))
         (avrg-tuple (emp_prob_helper $pattern $db $n_resample $subsize))
@@ -166,6 +170,7 @@
 ;; Returns:
 ;;   - Adjusted empirical probability
 ;; =============================================================================
+(: emp-prob-pbs (-> Expression hyperon::space::DynSpace Number Number))
 (= (emp-prob-pbs $pattern $db $db_ratio)
     (if (< 1 (n_conjuncts $pattern))
         (let ($emin $emax) (ji_prob_est_interval $pattern $db $db_ratio)
@@ -199,7 +204,7 @@
 ;; Returns:
 ;;   - Context-appropriate probability estimate
 ;; =============================================================================
-
+(: emp-prob-pbs (-> Expression hyperon::space::DynSpace Number Number Number))
 (= (emp-prob-pbs $pattern $db $prob-estimate $db-ratio)
     (let* ( ($support-estimate (prob_to_support $pattern $db $prob-estimate))
             ($db-size (* (db_size $db) $db-ratio)))

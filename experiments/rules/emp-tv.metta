@@ -782,6 +782,8 @@
 ;; Returns:
 ;;   - The simple truth value consisting of the computed mode and confidence.
 ;; =============================================================================
+(: mk-stv (-> Number Number EMPTV))
+
 (= (mk-stv $mean $variance)
     (let* (
             ($alpha (* $mean (// (* $mean (- 1 $mean)) $variance)))
