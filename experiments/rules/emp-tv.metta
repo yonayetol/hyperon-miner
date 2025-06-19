@@ -65,6 +65,7 @@
 ;; Returns:
 ;;   - A confidence value between 0 and 1
 ;; =============================================================================
+(: count_to_confidence (-> Number Number))
 (= (count_to_confidence $x) (// $x (+ $x (Default_k))))
 
 ;; =============================================================================
@@ -83,6 +84,8 @@
 ;; 
 ;; Returns:
 ;;   - EMPTV structure containing mean and confidence
+;; =============================================================================
+(: emp-tv (-> Expression hyperon::space::DynSpace TruthValue))
 (= (emp-tv $pattern $db)
     (let*
         (  
@@ -115,6 +118,7 @@
 ;; Returns:
 ;;   - The support value, representing the expected count or weight of the pattern in the database
 ;; =============================================================================
+(: prob_to_support (-> Expression hyperon::space::DynSpace Number Number))
 (= (prob_to_support $pattern $db $prob)
     (* $prob (universe-count $pattern $db))
 )
@@ -141,6 +145,7 @@
 ;; Returns:
 ;;   - An empirical truth value (e.g., confidence and mode), adjusted via bootstrapping
 ;; =============================================================================
+(: support_estimate_calculator (-> Expression hyperon::space::DynSpace Number Number TruthValue))
 (= (support_estimate_calculator $pattern $db $prob_estimate $db_ratio)
 
     (let* ( ($support_estimate (prob_to_support $pattern $db $prob_estimate))
@@ -168,6 +173,7 @@
 ;;   - 1: If support estimate ≥ database size
 ;;   - 2: If support estimate < database size
 ;; =============================================================================
+(: categorize_by_support_estimate (-> Number Number Number))
 (= (categorize_by_support_estimate $db_size $support_estimate)
     (if (>= $support_estimate $db_size)
         1
@@ -201,6 +207,7 @@
 ;;   - emp-tv-bs result: If bootstrapping is needed.
 ;;   - emp_tv result: Otherwise.
 ;; =============================================================================
+(: emp_tv_pbs (-> Expression hyperon::space::DynSpace Number Number Number TruthValue))
 (= (emp_tv_pbs $pattern $db $prob_estimate $db_ratio $db_size $support_estimate)
     (case (categorize_by_support_estimate $db_size $support_estimate)
         (
@@ -230,6 +237,7 @@
 ;; Returns:
 ;;   - An integer indicating the support (number of matches) for the given pattern.
 ;; =============================================================================
+(: sup (-> Expression hyperon::space::DynSpace Number))
 (= (sup $pattern $db)
     (tuple-count 
         (collapse 
@@ -250,6 +258,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; MOCKING ;;;;;;
 ;;;;;;;;;;;;;;;;;
+
 ( = (do-ji-tv-est-dummy $db $pattern) (                     
     $pattern  (STV 0.0016129032258064761 0.012488011224382688)                        
 ))                                                    
@@ -273,6 +282,7 @@
 ;; Returns:
 ;;   - $tv: The estimated truth value of the pattern based on joint independent.
 ;; =============================================================================
+(: ji_tv_est (-> Expression hyperon::space::DynSpace TruthValue))
 (= (ji_tv_est $pattern $db) 
     (let* 
         (
@@ -304,6 +314,7 @@
 ;;   - 2: If $subsize > ($ts / 2)
 ;;   - 1: If $subsize ≤ ($ts / 2)
 ;; =============================================================================
+(: categorize_subsize (-> Number Number Number))
 (= (categorize_subsize $subsize $ts)
     (if (> $subsize (// $ts 2))
         2
@@ -329,6 +340,7 @@
 ;; Returns:
 ;;   - A new database instance containing all the data from the original database.
 ;; =============================================================================
+(: copy-db (-> hyperon::space::DynSpace Expression hyperon::space::DynSpace))
 (= (copy-db $db $old-db-content)
     (if (== $old-db-content ()) $db
         (let* ( ($_ (add-reduct $db (car-atom $old-db-content)) )
@@ -356,6 +368,7 @@
 ;; Returns:
 ;;   - The database with the specified number of atoms added.
 ;; =============================================================================
+(: add_n_atoms_to_db (-> hyperon::space::DynSpace Number hyperon::space::DynSpace))
 (= (add_n_atoms_to_db $db $n)
     (if (<= $n 0) $db
         (let* ( ($_ (add-atom $db Pattern))
@@ -385,6 +398,7 @@
 ;; Returns:
 ;;   - A new database instance, containing the original database's data and the additional atoms added.
 ;; =============================================================================
+(: copy-and-add-atom (-> hyperon::space::DynSpace Number hyperon::space::DynSpace))
 (= (copy-and-add-atom $db $n)
     (if (<= $n 0) $db
         (let* ( ($new-db (copy-db (new-space) ( (collapse (get-atoms $db)) ))))
@@ -411,6 +425,7 @@
 ;; Returns:
 ;;   - A new space instance containing the original space's data and the additional atoms added.
 ;; =============================================================================
+(: duplicate-and-expand-space (-> hyperon::space::DynSpace Number hyperon::space::DynSpace))
 (= (duplicate-and-expand-space $space $n)
     (let $new-db (copy-db  (new-space) (collapse (get-atoms $space) ) )
         (add_n_atoms_to_db $new-db $n)
@@ -440,6 +455,7 @@
 ;; Returns:
 ;;   - A new database instance containing the first $size atoms from the original database.
 ;; =============================================================================
+(: copy-db-by-size (-> hyperon::space::DynSpace Expression Number Number hyperon::space::DynSpace))
 (= (copy-db-by-size $db $old-db-content $n $size)
     (if (or (== $old-db-content ()) (>= $n $size)) $db
         (let* ( ($_ (add-atom $db (car-atom $old-db-content)) ))
@@ -471,6 +487,7 @@
 ;; Returns:
 ;;   - A new database instance with a size adjusted to match the target subset size ($subsize).
 ;; =============================================================================
+(: subsample (-> hyperon::space::DynSpace Number hyperon::space::DynSpace))
 (= (subsample $db $subsize)
     (if (<= (db_size $db) $subsize)
         $db
@@ -555,6 +572,7 @@
 ;; Returns:
 ;;   - A new space containing the random subsample of the original database.
 ;; =============================================================================
+(: gen-random-subsample (-> hyperon::space::DynSpace Number hyperon::space::DynSpace))
 (= (gen-random-subsample $db $subsize $space)
     (if (== (db_size $db) $subsize)
         $db
@@ -592,6 +610,7 @@
 ;; Returns:
 ;;   - The empirical truth value for the pattern based on the subsampled database.
 ;; =============================================================================
+(: emp-tv-subsmp (-> Expression hyperon::space::DynSpace Number TruthValue))
 (= (emp-tv-subsmp $pattern $db $subsize)
     (let* ( ($space (subsample-py $db $subsize)))
         (emp-tv $pattern $space)
@@ -621,6 +640,7 @@
 ;; Returns:
 ;;   - A list containing the empirical truth values for the pattern, calculated from multiple subsamples.
 ;; =============================================================================
+(: emp-tv-bs-helper (-> Expression hyperon::space::DynSpace Number Number Expression))
 (= (emp-tv-bs-helper $pattern $db $n-resample $subsize)
     (if (== $n-resample 0)
         () ; Base case: no more resampling, return an empty list
@@ -657,6 +677,7 @@
 ;;   - The calculated sub-sample size, ensuring it is at least the minimum 
 ;;     size and does not exceed the database size.
 ;; =============================================================================
+(: subsmp-size (-> Expression Number Number Number))
 (= (subsmp-size $pattern $db-size $support-estimate)
     (let* ( ($nc (n_conjuncts $pattern))    
             (($min-size) (10))   
@@ -694,6 +715,7 @@
 ;; Returns:
 ;;   - The empirical truth value (emp-tv) calculated using bootstrapping (resampling).
 ;; =============================================================================
+(: emp-tv-bs (-> Expression hyperon::space::DynSpace Number Number Number TruthValue))
 (= (emp-tv-bs $pattern $db $db_size $db_ratio $support_estimate) (
         let* (
             ($db-size-ratio (* $db_size $db_ratio))
@@ -736,6 +758,7 @@
 ;;   - If subsize is smaller than the database size: A simple truth value based on the average empirical truth values from the resamples.
 ;;   - If subsize is greater than or equal to the database size: The direct empirical truth value of the pattern.
 ;; =============================================================================
+(: emp-tv-bs (-> Expression hyperon::space::DynSpace Number Number TruthValue))
 (= (emp-tv-bs $pattern $db $n-resample $subsize)
     (if (< $subsize (db_size $db))
         (let* (

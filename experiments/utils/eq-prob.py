@@ -201,7 +201,7 @@ def to_conjunction_with_comma(patterns):
         return f"(, {' '.join(patterns)} )" if patterns else '()'
     else:
         return f"{' '.join(patterns)}" if patterns else '()'
-def eq_prob (partition, pattern,db_size):
+def eq_prob (partition, pattern, db_size):
     # Parse the input string to get the list of elements
     # get the variables from the pattern
     # the count the variables inside partition
