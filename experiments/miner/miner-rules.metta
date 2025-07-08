@@ -18,25 +18,41 @@
 
 
 ;; rule to extract abstract patterns from the database
+; (: abstract-pattern
+;  (-> (db-ref $db)
+;    (-> (uniqueLink $db $ptrn $cnt)
+;     (-> (ms-threshold $ms)
+;       (-> (⍃ $ms $cnt)
+;       (-> (replace_variables $ptrn)
+;        (AbstractPattern $ptrn)))))))
+
 (: abstract-pattern
- (-> (db-ref $db)
-   (-> (uniqueLink $db $ptrn $cnt)
+   (-> (uniqueLink $ptrn $cnt)
     (-> (ms-threshold $ms)
       (-> (⍃ $ms $cnt)
       (-> (replace_variables $ptrn)
-       (AbstractPattern $ptrn)))))))
+       (AbstractPattern $ptrn))))))
+
 ; (: abstract-pattern
 ;  (-> (db-ref $db)
 ;    (-> (uniqueLink $db $ptrn $cnt)
 ;        (AbstractPattern $ptrn))))
 
 ;; rule to specialize abstract patterns
+; (: specialization
+;     (-> (AbstractPattern $aptrn) 
+;      (-> (replace_index $aptrn $naptrn)
+;       (-> (db-ref $db)
+;         (specializationOf $naptrn (build-specialization-chain $naptrn $db))))))
+
 (: specialization
     (-> (AbstractPattern $aptrn) 
      (-> (replace_index $aptrn $naptrn)
-      (-> (db-ref $db)
-        (specializationOf $naptrn (build-specialization-chain $naptrn $db))))))
+           (-> (specialize-cpu $naptrn $specializations)
+                 (-> (replace_variables $specializations)
+                           (specializationOf $aptrn $specializations))))))
 
+                 
 (: support 
       (-> (specializationOf $aptrn $sptrn)
        (-> (db-ref $db)

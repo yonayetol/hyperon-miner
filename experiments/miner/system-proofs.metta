@@ -42,6 +42,8 @@
    (== (get-type $x) Number) 
 )
 
+
+
 ;; define system proofs 
 ------------------------------------------------------------------
 ;; System proof for ⍃
@@ -59,16 +61,49 @@
              (empty)))
              
 
-(= (syn $kb $_ (: $prf (uniqueLink $db $pattern $cnt))) 
+; (= (syn $kb $_ (: $prf (uniqueLink $db $pattern $cnt))) 
+;     (let* (
+;         ($uniquelink (collapse (unique (match $db ($link $x $y) $link)) ) )
+;         ($sup (superpose $uniquelink))
+;         )
+;     (if (== (size-atom $uniquelink) 0)
+;           (empty)
+;              (: CPUUnique (uniqueLink $db ($sup $a $b) (count-sup $db ($sup $a $b))))
+;              ))
+;     )
+
+(= (syn $kb $_ (: $prf (uniqueLink  $pattern $cnt))) 
     (let* (
-        ($uniquelink (collapse (unique (match $db ($link $x $y) $link)) ) )
-        ($sup (superpose $uniquelink))
+        ($db (match $kb (db-ref $db) $db))
+        ($uniquelink   (collapse (match $db ($link $x $y) $link))  )
+        ($unq (unique-atom $uniquelink))
+        ($sup (superpose $unq))
         )
-    (if (== (size-atom $uniquelink) 0)
+    (if (== (size-atom $unq) 0)
           (empty)
-             (: CPUUnique (uniqueLink $db ($sup $a $b) (count-sup $db ($sup $a $b))))
+             (: CPUUnique (uniqueLink  ($sup $a $b) (count-sup $db ($sup $a $b))))
              ))
     )
+
+(= (make-spacialization $naptrn $special) 
+      (: CPUSPECIAL (specialize-cpu $naptrn   $special))  
+)
+      
+(= (syn $kb $_ (: $prf (specialize-cpu $naptrn $specializations)))
+    (let* (
+        ($dbb (match $kb (db-ref $db) $db))
+        ($specialization (build-specialization-chain $naptrn $dbb))
+         (() (println! (specialization: $specialization )))
+        
+   
+        )
+           ; (println! ((: CPUSPECIAL (specialize-cpu $naptrn $specialization))))
+            (: CPUSPECIAL (specialize-cpu $naptrn $specialization))
+    
+))
+
+
+
 
 (= (syn $kb $_ (: $prf (replace_variables $ptrn)))
     (let* (
@@ -180,3 +215,5 @@
       (() (println! (cres: $cres)))
           )
      $cres))
+
+

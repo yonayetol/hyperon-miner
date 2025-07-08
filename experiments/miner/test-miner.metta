@@ -52,9 +52,9 @@
 
 
 ;; define parameters 
-(=(min-sup) 2)
-(=(surp-mode) jsdsurp)
-(=(db-ratio) 0.5)
+; (=(min-sup) 2)
+; (=(surp-mode) jsdsurp)
+; (=(db-ratio) 0.5)
 ; !(add-atom &kb (: msT (ms-threshold 2)))
 ; !(add-atom &kb (: SUP (supportOf $ptrn 5)))
 
@@ -63,9 +63,15 @@
 ;; test the cog-miner
 ;; without sorting 
 ; ! (cog-mine &db &kb (min-sup) (surp-mode) (db-ratio) )
-! (cog-mine &db &kb (min-sup) (surp-mode) (db-ratio) 1 1)
 
+(=(min-sup) 2)
+(=(surp-mode) jsdsurp)
+(=(db-ratio) 0.5)
 
+! (cog-mine &db &kb (min-sup) (surp-mode) (db-ratio) 1 2)
+;! (let $res (collapse (cog-mine &db &kb (min-sup) (surp-mode) (db-ratio))) (count-tuple $res))
+
+;!(unique-atom (Inheritance Inheritance Inheritance Inheritance inher))
 
 ; !(syn &kb (fromNumber 5) (: $prf (AbstractPattern $x))) 
 ; !(abstract (fromNumber 5) &kb)
@@ -77,7 +83,7 @@
 ; !(conjunction (fromNumber 11) &kb 1 2)
 ; 
 
-!(match &kb $x $x)
+;!(match &kb $x $x)
 ;!(get-metatype (@doc random-int (@desc "Returns random int number from range defined by two numbers (first and second argument)")))
 
 ;;add the rb ref to the kb 

@@ -1,52 +1,52 @@
-!(register-module! ../../experiments)
+; !(register-module! ../../experiments)
 ; !(register-module!  ../../../../chaining)
 
 ; !(import! &self experiments:miner:miner)
-!(import! &self experiments:miner:miner-utils)
-!(import! &self experiments:rules:conj-exp)
-!(import! &self experiments:rules:freq-pat)
-!(import! &self experiments:rules:use-python)
-!(import! &self experiments:utils:variable-combinations)
+; !(import! &self experiments:miner:miner-utils)
+; !(import! &self experiments:rules:conj-exp)
+; !(import! &self experiments:rules:freq-pat)
+; !(import! &self experiments:rules:use-python)
+; !(import! &self experiments:utils:variable-combinations)
 
 
 
 
-;; import utils and rules files 
-! (import! &self experiments:rules:isurp)
-! (import! &self experiments:rules:isurp-old)
-! (import! &self experiments:utils:common-utils)
-! (import! &self experiments:utils:beta-dist)
-! (import! &self experiments:utils:constants)
-! (import! &self experiments:utils:TruthValue)
-! (import! &self experiments:utils:surp-utils)
-! (import! &self experiments:utils:miner-utils)
-! (import! &self experiments:rules:build-specialization)
-! (import! &self experiments:rules:conjunction-expansion)
+; ;; import utils and rules files 
+; ! (import! &self experiments:rules:isurp)
+; ! (import! &self experiments:rules:isurp-old)
+; ! (import! &self experiments:utils:common-utils)
+; ! (import! &self experiments:utils:beta-dist)
+; ! (import! &self experiments:utils:constants)
+; ! (import! &self experiments:utils:TruthValue)
+; ! (import! &self experiments:utils:surp-utils)
+; ! (import! &self experiments:utils:miner-utils)
+; ! (import! &self experiments:rules:build-specialization)
+; ! (import! &self experiments:rules:conjunction-expansion)
 
-! (import! &self experiments:utils:gen_partition)
-! (import! &self experiments:rules:est-tv)
-! (import! &self experiments:rules:emp-tv)
-! (import! &self experiments:rules:emp-prob)
-! (import! &self experiments:rules:jsd)
-! (import! &self experiments:utils:emp-tv-bs)
-! (import! &self experiments:utils:bs-utils)
-! (import! &self experiments:utils:util-jsd)
-; ! (import! &dbspace experiments:data:ugly_man_sodaDrinker)
-! (import! &dbspace experiments:data:small-ugly)
+; ! (import! &self experiments:utils:gen_partition)
+; ! (import! &self experiments:rules:est-tv)
+; ! (import! &self experiments:rules:emp-tv)
+; ! (import! &self experiments:rules:emp-prob)
+; ! (import! &self experiments:rules:jsd)
+; ! (import! &self experiments:utils:emp-tv-bs)
+; ! (import! &self experiments:utils:bs-utils)
+; ! (import! &self experiments:utils:util-jsd)
+; ; ! (import! &dbspace experiments:data:ugly_man_sodaDrinker)
+; ! (import! &dbspace experiments:data:small-ugly)
 
 
 
-;; config kb : load the chainer , rules , system-proofs ....
-; !(import! &self  chaining:dtl:backward:curried)
-!(import! &temp   experiments:miner:miner-rules)
-!(import! &self  experiments:miner:system-proofs)
+; ;; config kb : load the chainer , rules , system-proofs ....
+; ; !(import! &self  chaining:dtl:backward:curried)
+; !(import! &temp   experiments:miner:miner-rules)
+; !(import! &self  experiments:miner:system-proofs)
 
-;;create new space for kb
-!(bind! &kb (new-space)) 
-!(bind! &db (new-space)) 
+; ;;create new space for kb
+; !(bind! &kb (new-space)) 
+; !(bind! &db (new-space)) 
 
-!(let ($link $x $y) (get-atoms &dbspace) (add-atom &db ($link $x $y)))
-!(let $atoms  (get-atoms &temp) (add-atom &kb $atoms) )
+;  !(let ($link $x $y) (get-atoms &dbspace) (add-atom &db ($link $x $y)))
+; !(let $atoms  (get-atoms &temp) (add-atom &kb $atoms) )
 
 
 ; !(add-atom &kb (: candidate (candidate-clean (Inheritance Z ugly))))
@@ -133,28 +133,54 @@
       superpose((: (surprisingness (((minsupport FACT4) msT) CPU)) (surp (, (, (INHERITANCE_LINK $X $Y) (LIST_LINK L $D)) (LIST_LINK B k)) 0.6))
                (: (surprisingness (((minsupport FACT4) msT) CPU)) (surp (, (, (INHERITANCE_LINK $X $Y) (LIST_LINK L $D)) (LIST_LINK B k)) 0.8)))
 ))
+; (= (abstract $depth $kb)
+;     ; (chain (syn $kb $depth (: $prf (AbstractPattern $x))) $res (add-reduct $kb $res))
+;    (collapse 
+;    (let* (
+;     ($res (syn $kb $depth (: $prf (AbstractPattern $x))))
+;     ($rem (remove-atom $kb $res))
+;     ($add (add-atom $kb $res))
+;     ) 
+;     $res
+;     ))
+; )
 (= (abstract $depth $kb)
-    ; (chain (syn $kb $depth (: $prf (AbstractPattern $x))) $res (add-reduct $kb $res))
-   (collapse 
-   (let* (
-    ($res (syn $kb $depth (: $prf (AbstractPattern $x))))
-    ($rem (remove-atom $kb $res))
-    ($add (add-reduct $kb $res))
-    ) 
-    $res
-    ))
+  ( chain   (syn $kb $depth (: $prf (AbstractPattern $x))) $atoms (add-atoms-nodup $kb $atoms)
+    )
 )
+
+; (= (specialization $depth $kb)
+;     ; (chain (syn $kb $depth (: $prf (specializationOf $aptrn $sptrn))) $res (add-reduct $kb $res))
+;     (collapse 
+;    (let* (
+;     ($res (syn $kb $depth (: $prf (specializationOf $aptrn $sptrn))))
+;     ($rem (remove-atom $kb $res))
+;     ($add (add-atom $kb $res))
+;     ) 
+;     $res
+;     ))
+; )
+
+
 (= (specialization $depth $kb)
-    ; (chain (syn $kb $depth (: $prf (specializationOf $aptrn $sptrn))) $res (add-reduct $kb $res))
-    (collapse 
+   
    (let* (
     ($res (syn $kb $depth (: $prf (specializationOf $aptrn $sptrn))))
+    (() (println! $res))
+     
     ($rem (remove-atom $kb $res))
-    ($add (add-reduct $kb $res))
+    ($add (add-atom $kb $res))
+   
     ) 
-    $res
-    ))
-) 
+    ()
+    )
+)
+
+; (= (specialization $depth $kb)
+;   ( chain  (syn $kb $depth (: $prf (specializationOf $aptrn $sptrn)))  $atom (println! (atom: $atom))
+;     )
+; )
+
 (= (support $depth $kb)
     ; (chain (syn $kb $depth (: $prf (supportOf $sptrn $cnt))) $res (add-reduct $kb $res))
       (collapse 
@@ -235,13 +261,13 @@
 (= (frequent-miner $db $kb $maxclauses $limit) 
 ( 
      let*  ( 
-         ($re (collapse (abstract (fromNumber 5) $kb)))
-         ($res (collapse (specialization (fromNumber 4) $kb)))
-         ($resu (collapse (support (fromNumber 4) $kb)))
-         ($result (collapse (candidate (fromNumber 5) $kb)))
-         ($results (collapse (conjunction (fromNumber 13) $kb $maxclauses $limit)))
-         ($resultn (collapse (remove_redundant_conjunctions (fromNumber 2) $kb)))
-         ($resultf (collapse (format (fromNumber 4) $kb)))
+         (()  (abstract (fromNumber 5) $kb))
+          (() (specialization (fromNumber 4) $kb))
+        ;  ($resu (collapse (support (fromNumber 4) $kb)))
+        ;  ($result (collapse (candidate (fromNumber 5) $kb)))
+        ;  ($results (collapse (conjunction (fromNumber 13) $kb $maxclauses $limit)))
+        ;  ($resultn (collapse (remove_redundant_conjunctions (fromNumber 2) $kb)))
+        ;  ($resultf (collapse (format (fromNumber 4) $kb)))
       ) ()
 )
 )
@@ -336,22 +362,24 @@
 ;;Store the chainer result in to the &res (new space)
 ----------------------------------------------------------------------------
 (= (cog-mine $db $kb $ms $surp $db-ratio $maxclauses $limit) (
-    let* (
+    let* (    
+             (() (println! (Hello)))
              (() (init-miner $db $kb $ms $surp $db-ratio)) 
              (() (frequent-miner $db $kb $maxclauses $limit))
             ;  (() (init-surp $kb &res $surp))           
     )
     ;; return all atoms in &res
     ; (match &res $x $x)
-    (match $kb $x $x)
+   ; (match $kb  (: $prf (db-ref $x))  (: $prf (db-ref $x)))
+    (match $kb  (: $prf (specializationOf $aptrn $sptrn))  (: $prf (specializationOf $aptrn $sptrn)))
 ))
 
 
-(=(min-sup) 2)
-(=(surp-mode) jsdsurp)
-(=(db-ratio) 0.5)
+; (=(min-sup) 2)
+; (=(surp-mode) jsdsurp)
+; (=(db-ratio) 0.5)
 
-! (cog-mine &db &kb (min-sup) (surp-mode) (db-ratio) 1 2)
+; ! (cog-mine &db &kb (min-sup) (surp-mode) (db-ratio) 1 2)
 
 
 ; !(init-miner &db &kb (min-sup) (surp-mode) (db-ratio))
