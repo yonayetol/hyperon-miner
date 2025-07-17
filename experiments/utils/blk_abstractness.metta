@@ -274,6 +274,8 @@
  
  )
 
+
+
 (= (can-unify-ground $ground1 $ground2)
     (if (== $ground1 $ground2)
         True
@@ -868,16 +870,33 @@
 !(add-atom (get-space) (Eyob $x Meti))
 
 
-!(eq-prob (((Inheritance $x human) (Inheritance Rio $y)) ((Inheritance Abe $y)))
-          ((Inheritance $x human) (Inheritance Rio $y) (Inheritance Abe $y))
-          (get-space))
 
 ; (= (eq-prob $partition $pattern $db)
 ; !(can-unify ((Inheritance $x human) (Inheritance Rio $y)) ((Inheritance Abe $y)))
 ; !(can-unify ((Inheritance $x human))  ((Inheritance $x human)))
 
-; !(sort-by-abstraction (((Human $x Chala)) ((Human $x $y)) ) $x)
+; !(sort-by-abstraction (((Human $x Chala)) ((Human $x $y)) ((Human Eyob Chala)) ) $x)
 
 ; !(match (get-space) (Eyob $y $z) ($z $y))
 
 ; !(can-unify ((Human $x $z)) ((Human $x Chala)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+; !(partition (A B C))
+
+; (
+;     ((A B C)) 
+;     ((A B) (C)) 
+;     ((A C) (B)) 
+;     ((A) (B) (C)) 
+;     ((A) (B C))
+; )
+
+
+; !(is-blk-syntax-more-abstract ((Inheritance $y $x)) ((Inheritance $z $y)) $y)
