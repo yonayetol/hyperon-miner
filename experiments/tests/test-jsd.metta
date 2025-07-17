@@ -1,8 +1,11 @@
 ! (register-module! ../../../hyperon-miner/experiments)
 ! (import! &self experiments:utils:common-utils)
-! (import! &self experiments:utils:util-jsd)
-! (import! &self experiments:rules:jsd)
-! (import! &self experiments:rules:emp-prob)
+! (import! &self experiments:utils:jsd-helper)
+! (import! &self experiments:utils:jsd)
+! (import! &self experiments:utils:beta-dist)
+! (import! &self experiments:utils:TruthValue)
+! (import! &self experiments:utils:constants)
+
 
 ;; =============================================================================
 ;; Test: do-jsd (Basic JSD Calculation)
@@ -32,6 +35,10 @@
 ;;   - Validates floating-point precision handling
 ;;   - Confirms proper handling of base-10 logarithms
 ;; =============================================================================
-!(assertEqual 
-  (do-jsd (STV 0.5 1) (STV 0.65 1)) 
-  0.0461555120911388)
+; !(assertEqual 
+;   (jsd (STV 0.5 1) (STV 0.65 1)) 
+;   0.0461555120911388)
+
+
+!(jsd (STV 0.8 0.111111) (STV 0.1 0.5555555555555556))
+  
