@@ -76,7 +76,7 @@
 
 !(bind! &res2 (new-space))
 
- !(pattern-miner &res2 &db 4 1 none True) 
+ !(pattern-miner &res2 &db 4 0 none True) 
  !(collapse (match &res2 $pattern $pattern ))
 ;; Expected result
 ; ((supportOf (, (Inheritance $a88#3981498 human) (Inheritance $a88#3981498 man) (Inheritance $a88#3981498 ugly)) 3) 
