@@ -20,5 +20,5 @@
 !(bind! conjunctSpace (new-space))
 
 ; !(frequency-pattern-miner dataBase-space conjunct-Space min-Support number-of-pattern-in-one-conjunct minus 2)
-!(frequency-pattern-miner dataBase conjunctSpace 2 1)
+!(frequency-pattern-miner dataBase conjunctSpace 3 1)
 

@@ -1,19 +1,14 @@
-; !(import! &self ../data/ugly_man_sodaDrinker)
-; !(import! &self ../utils/variable-combinations)
-; !(import! &self Updated-conjunction-expansion)
-
-
-
 ; Check if a variable is in a list
 (= (is-var-in-list $var $list) (if (== $list ()) False (let $head (car-atom $list) (if (== $var $head) True (is-var-in-list $var (cdr-atom $list))))))
-
-
 ; Check if variables from one list exist in another list
 (= (vars-exist $list1 $list2) (if (== $list1 ()) False (let $head (car-atom $list1) (if (is-var-in-list $head $list2) True (vars-exist (cdr-atom $list1) $list2)))))
+; !(---------)
+; !(vars-exist ($tr) ( hi aha a $etr))
+; !(---------)
 
-(= (combiner-pat1-pat2 $vars () $accum)
-   $accum
-)
+
+(= (combiner-pat1-pat2 $vars () $accum) $accum)
+
 (= (combiner-pat1-pat2 $vars $pat2 $accum)
   (superpose (
     ;; Option 1: keep the slot
@@ -62,16 +57,24 @@
 ; !(if (not (== () (collapse (is_member ((name1: $name1) (name2: $name2) (name3: $name3)) (name2: $name2))))) (found) ("not found"))
 ; ------------------------------------------------------------------------------------------------------;
 
+; is-member-custom
+(= (is-member-custom $x $acc) 
+    (if (== () $acc) False
+        (let ($head $tail) (decons-atom $acc)
+            (if (=alpha $head $x) True (is-member-custom $x $tail))
+        )
+        
+    )
+)
+
+
 (= (fromNumber $n) (if (<= $n 0) Z (S (fromNumber (- $n 1)))))
 
 (= (count $atom $list)
    (foldl-atom $list 0 $acc $x (eval (if (== $atom $x) (+ $acc 1) $acc))))
 
 ( = (evalLinkHelper $links $minSup $acc $link) 
-    (if (or (or (== $link @doc) (== $link =)) (not (== () (collapse (is_member $acc $link)))))
-        $acc ;irrelevant link to check support
-        (if (>= (count $link $links) $minSup) (union-atom $acc ($link)) $acc ) ;check support and add if it meets minSup
-    )
+    (if (>= (count $link $links) $minSup) (union-atom $acc ($link)) $acc );check support and add if it meets minSup
 )
 
 ; ------------------------------------------------------------------------------------------------------;
@@ -81,8 +84,10 @@
 ; return:- Boolean
 ; method:- check if the support of the link in the given space is greater than or equal to the minimum support
 (= (evalLink $links $minSup)
-    (foldl-atom $links () $acc $link 
-        (evalLinkHelper $links $minSup $acc $link))
+    (let $uniLinks (unique-atom $links)
+        (foldl-atom $uniLinks () $acc $link 
+            (evalLinkHelper $links $minSup $acc $link))
+    )
 )
 ; !(evalLink (Inheritance1 Inheritance2 Inheritance Inheritance Inheritance2 Inheritance1 Inheritance1 = = = = =) 2)
 ; ------------------------------------------------------------------------------------------------------;
@@ -104,10 +109,10 @@
 ; parameters:- accumulator, atom
 ; return:- accumulator
 ; method:- append the atom only when it is not already present in the accumulator
-( = (giveMeUniqueAcc $acc $x) 
-    (if (== () (collapse (is_member $acc $x)))
-        (union-atom $acc ($x))
+( = (giveMeUniqueAcc $x $acc) 
+    (if (is-member-custom $x $acc)
         $acc
+        (union-atom $acc ($x))
     )
 )
 ; ------------------------------------------------------------------------------------------------------;
@@ -118,12 +123,13 @@
 ; return:- list of atoms
 ; method:- fold the list with giveMeUniqueAcc to remove duplicates
 ( = (only_unique $specials) 
-    (foldl-atom $specials () $acc $x (giveMeUniqueAcc $acc $x) )
+    (foldl-atom $specials () $acc $x (giveMeUniqueAcc $x $acc))
 )
 ; !(only_unique ((Inheritance $varNum0 woman) (Inheritance $varNum0 $varNum1) (Inheritance Lucy woman) (Inheritance Lucy $varNum1) (Inheritance $varNum0 woman) (Inheritance $varNum0 $varNum1) (Inheritance Emily woman) (Inheritance Emily $varNum1) (Inheritance $varNum0 human) (Inheritance $varNum0 $varNum1) (Inheritance Cason human) (Inheritance Cason $varNum1) (Inheritance $varNum0 man) (Inheritance $varNum0 $varNum1) (Inheritance Cason man) (Inheritance Cason $varNum1) (Inheritance $varNum0 ugly) (Inheritance $varNum0 $varNum1) (Inheritance Cason ugly) (Inheritance Cason $varNum1) (Inheritance $varNum0 sodaDrinker) (Inheritance $varNum0 $varNum1) (Inheritance Cason sodaDrinker) (Inheritance Cason $varNum1) (Inheritance $varNum0 ugly) (Inheritance $varNum0 $varNum1) (Inheritance Lily ugly) (Inheritance Lily $varNum1) (Inheritance $varNum0 sodaDrinker) (Inheritance $varNum0 $varNum1) (Inheritance Lily sodaDrinker) (Inheritance Lily $varNum1) (Inheritance $varNum0 human) (Inheritance $varNum0 $varNum1) (Inheritance Abe human) (Inheritance Abe $varNum1) (Inheritance $varNum0 man) (Inheritance $varNum0 $varNum1) (Inheritance Abe man) (Inheritance Abe $varNum1) (Inheritance $varNum0 ugly) (Inheritance $varNum0 $varNum1) (Inheritance Abe ugly) (Inheritance Abe $varNum1) (Inheritance $varNum0 sodaDrinker) (Inheritance $varNum0 $varNum1) (Inheritance Abe sodaDrinker) (Inheritance Abe $varNum1) (Inheritance $varNum0 human) (Inheritance $varNum0 $varNum1) (Inheritance Allen human) (Inheritance Allen $varNum1) (Inheritance $varNum0 man) (Inheritance $varNum0 $varNum1) (Inheritance Allen man) (Inheritance Allen $varNum1) (Inheritance $varNum0 ugly) (Inheritance $varNum0 $varNum1) (Inheritance Allen ugly) (Inheritance Allen $varNum1) (Inheritance $varNum0 sodaDrinker) (Inheritance $varNum0 $varNum1) (Inheritance Allen sodaDrinker) (Inheritance Allen $varNum1)))
 ; !(only_unique ((Inheritance Allen sodaDrinker) (Inheritance Allen $_67148) (Inheritance $_67166 sodaDrinker) (Inheritance $_67190 $_67196) (Inheritance Abe sodaDrinker) (Inheritance Abe $_67244) (Inheritance $_67262 sodaDrinker) (Inheritance $_67286 $_67292) (Inheritance Lily sodaDrinker) (Inheritance Lily $_67340) (Inheritance $_67358 sodaDrinker) (Inheritance $_67382 $_67388) (Inheritance Cason sodaDrinker) (Inheritance Cason $_67436) (Inheritance $_67454 sodaDrinker) (Inheritance $_67478 $_67484) (Inheritance Lily ugly) (Inheritance Lily $_67532) (Inheritance $_67550 ugly) (Inheritance $_67574 $_67580) (Inheritance Allen ugly) (Inheritance Allen $_67628) (Inheritance $_67646 ugly) (Inheritance $_67670 $_67676) (Inheritance Abe ugly) (Inheritance Abe $_67724) (Inheritance $_67742 ugly) (Inheritance $_67766 $_67772) (Inheritance Cason ugly) (Inheritance Cason $_67820) (Inheritance $_67838 ugly) (Inheritance $_67862 $_67868) (Inheritance Lily woman) (Inheritance Lily $_67916) (Inheritance $_67934 woman) (Inheritance $_67958 $_67964) (Inheritance Emily woman) (Inheritance Emily $_68012) (Inheritance $_68030 woman) (Inheritance $_68054 $_68060) (Inheritance Lucy woman) (Inheritance Lucy $_68108) (Inheritance $_68126 woman) (Inheritance $_68150 $_68156) (Inheritance Allen man) (Inheritance Allen $_68204) (Inheritance $_68222 man) (Inheritance $_68246 $_68252) (Inheritance Abe man) (Inheritance Abe $_68300) (Inheritance $_68318 man) (Inheritance $_68342 $_68348) (Inheritance Cason man) (Inheritance Cason $_68396) (Inheritance $_68414 man) (Inheritance $_68438 $_68444) (Inheritance Allen human) (Inheritance Allen $_68492) (Inheritance $_68510 human) (Inheritance $_68534 $_68540) (Inheritance Abe human) (Inheritance Abe $_68588) (Inheritance $_68606 human) (Inheritance $_68630 $_68636) (Inheritance Cason human) (Inheritance Cason $_68684) (Inheritance $_68702 human) (Inheritance $_68726 $_68732) (Inheritance Lily human) (Inheritance Lily $_68780) (Inheritance $_68798 human) (Inheritance $_68822 $_68828) (Inheritance Emily human) (Inheritance Emily $_68876) (Inheritance $_68894 human) (Inheritance $_68918 $_68924) (Inheritance Lucy human) (Inheritance Lucy $_68972) (Inheritance $_68990 human) (Inheritance $_69014 $_69020)))
-; !(only_unique ((Inheritance $_67166 sodaDrinker) (Inheritance $_67167 sodaDrinker) (Inheritance $_67166 $_67168) ))
+; !(only_unique ((Inheritance $_67166 sodaDrinker) (Inheritance $_67166 sodaDrinker) (Inheritance $_67166 $_67168) ))
 ; ------------------------------------------------------------------------------------------------------;
+
 
 ; ------------------------------------------------------------------------------------------------------;
 ; function name:- myFlatten
@@ -173,7 +179,7 @@
         )
     )
 )
-!(variableExtractor (tru age is $never told (to someone $tru) (($ret $wr sdf (sdf $r)))))
+; !(variableExtractor (tru age is $never told (to someone $tru) (($ret $wr sdf (sdf $r)))))
 ; ------------------------------------------------------------------------------------------------------;
 
 ; ------------------------------------------------------------------------------------------------------;
@@ -193,7 +199,7 @@
 ) 
 
 ( = (getOrderlyVariables $pattern) 
-  (let $debug (println! (pattern:- $pattern)) (foldl-atom $pattern () $store $curr (getOrderlyVariablesHelper $curr $store)))
+  (foldl-atom $pattern () $store $curr (getOrderlyVariablesHelper $curr $store))
 )
 ; !(getOrderlyVariables (hi $var1 (((var var ($asdfjkgs ($asfgkb $ask awrjk) $wert $wertr ser) gw ert) weg) wet) wetr $var2) )
 ; ------------------------------------------------------------------------------------------------------;
@@ -227,15 +233,18 @@
 
 
 ; Check if a variable is in a list
-(= (is-var-in-list $var $list) (not (== () (collapse ( if (== (superpose $list) $var) 1 (empty) )))))
+(= (is-var-in-list-Superpose $var $list) (not (== () (collapse ( if (== (superpose $list) $var) 1 (empty) )))))
 
 ; Check if variables from one list exist in another list
-(= (vars-exist $list1 $list2) 
+(= (vars-exist-Superpose $list1 $list2) 
     (not (== () (collapse (let $equality (== (superpose $list1) (superpose $list2))
         (if $equality True (empty))
     ))))
 )
-; !(vars-exist ($varNum0) ($varNum0 $varNum1 $varNum2))
+; !(---------)
+; !(vars-exist-Superpose ($tr) ( hi aha a $etr))
+; !(---------)
+
 
 (= (combiner-pat1-pat2 $vars () $accum) $accum)
 (= (combiner-pat1-pat2 $vars $pat2 $accum)
@@ -251,13 +260,13 @@
 ; Get filtered combinations of variables
 (= (combine_list $vars1 $vars2)   
     (let* (  
-        ($debug1 (println! (---- Combining vars1:- $vars1 with vars2:- $vars2 ----)))  
+        ; ($debug1 (println! (---- Combining vars1:- $vars1 with vars2:- $vars2 ----)))  
         ($combinations (combiner-pat1-pat2 $vars1 $vars2 ()))  
-        ($debug2 (println! (from (vars1:- $vars1) (vars2:- $vars2) (combinations:- $combinations))))  
+        ; ($debug2 (println! (from (vars1:- $vars1) (vars2:- $vars2) (combinations:- $combinations))))  
         ($boolGot (vars-exist $combinations $vars1))  
-        ($debug3 (println! (do $combinations exist in vars1:- $boolGot)))  
+        ; ($debug3 (println! (do $combinations exist in vars1:- $boolGot)))  
         ($vars1-check (if $boolGot $combinations (empty)))  
-        ($debug4 (println! ($combinations exist in vars1:- $vars1-check)))  
+        ; ($debug4 (println! ($combinations exist in vars1:- $vars1-check)))  
     ) $combinations  
     )  
 )
